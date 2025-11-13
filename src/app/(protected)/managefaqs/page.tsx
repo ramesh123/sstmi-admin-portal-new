@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 
 interface FAQ {
-  id: string;
   question: string;
   answer: string;
 }
@@ -102,7 +101,6 @@ const FAQModal = ({ faq, onClose, onSave, isEdit }: {
     }
 
     const updatedFaq: FAQ = {
-      id: faq?.id || Date.now().toString(),
       question: formData.question,
       answer: formData.answer
     };
@@ -224,7 +222,7 @@ const FAQManager = () => {
   const [selectedFaq, setSelectedFaq] = useState<FAQ | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Load FAQs from storage on mount
@@ -235,14 +233,20 @@ const FAQManager = () => {
   const loadFaqsFromStorage = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/data/faqs.json', {
-        credentials: 'include',
-        headers: { Accept: 'application/json' },
+      const response = await fetch('https://ztu45fmv11.execute-api.us-east-1.amazonaws.com/prod/faqs', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          httpMethod: 'GET'
+        })
       });
       if (!response.ok) {
         throw new Error('Failed to fetch faqs');
       }
-      const data: any[] = await response.json();
+      const result = await response.json();
+      const data = JSON.parse(result.body);
       setFaqs(data);
     } catch (err) {
       setToast({ message: 'Failed to load faqs data. Please refresh the page.', type: 'error' });
@@ -254,7 +258,7 @@ const FAQManager = () => {
 
   const saveFaqsToStorage = async (faqs: any[]) => {
   try {
-    const response = await fetch('/api/save-faqs', {
+    const response = await fetch('http://sstmi-website.s3.us-east-1.amazonaws.com/assets/faq.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(faqs),
@@ -322,32 +326,66 @@ const FAQManager = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (faq: FAQ) => {
-    setSelectedFaq(faq);
-    setIsEdit(true);
-    setIsModalOpen(true);
-  };
-
   const handleSave = async (faq: FAQ) => {
-    let updatedFaqs: FAQ[];
-
-    if (isEdit) {
-      updatedFaqs = faqs.map(f => f.id === faq.id ? faq : f);
-      setToast({ message: 'FAQ updated successfully!', type: 'success' });
-    } else {
-      updatedFaqs = [...faqs, faq];
-      setToast({ message: 'FAQ added successfully!', type: 'success' });
+    setIsLoading(true);
+    try {
+     let jsonObj = {question:faq?.question,answer:faq?.answer};
+      const response = await fetch('https://ztu45fmv11.execute-api.us-east-1.amazonaws.com/prod/faqs', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          httpMethod: 'POST',
+          body:JSON.stringify(jsonObj)
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to post faqs');
+      }
+      const result = await response.json();
+      if(result?.body){
+        loadFaqsFromStorage();
+        setIsModalOpen(false);
+      }
+    } catch (err) {
+      //setToast({ message: 'Failed to load faqs data. Please refresh the page.', type: 'error' });
+      //console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setFaqs(updatedFaqs);
   };
 
-  const handleDelete = async (id: string) => {
-    const updatedFaqs = faqs.filter(f => f.id !== id);
+  const handleDelete = async (faq: any) => {
+    const updatedFaqs = faqs.filter(f => f.question !== faq?.question);
     setFaqs(updatedFaqs);
-    await saveFaqsToStorage(updatedFaqs);
-    setToast({ message: 'FAQ deleted successfully!', type: 'success' });
-    setDeleteConfirm(null);
+    setIsLoading(true);
+    try {
+     let jsonObj = {question:faq?.question,answer:faq?.answer};
+      const response = await fetch('https://ztu45fmv11.execute-api.us-east-1.amazonaws.com/prod/faqs', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          httpMethod: 'DELETE',
+          body:JSON.stringify(jsonObj)
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to post faqs');
+      }
+      const result = await response.json();
+      if(result?.body){
+        setToast({ message: 'FAQ deleted successfully!', type: 'success' });
+        setDeleteConfirm(null);
+      }
+    } catch (err) {
+      //setToast({ message: 'Failed to load faqs data. Please refresh the page.', type: 'error' });
+      //console.error(err);
+    } finally {
+      setIsLoading(false);
+    }    
   };
 
   return (
@@ -440,8 +478,8 @@ const FAQManager = () => {
                       </td>
                     </tr>
                   ) : paginatedData.length > 0 ? (
-                    paginatedData.map((row: FAQ) => (
-                      <tr key={row.id} className="hover:bg-blue-50 transition">
+                    paginatedData.map((row: FAQ,index) => (
+                      <tr key={index} className="hover:bg-blue-50 transition">
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {row.question}
                         </td>
@@ -451,16 +489,7 @@ const FAQManager = () => {
                         <td className="px-6 py-4 text-sm text-center">
                           <div className="flex items-center justify-center gap-2">
                             <button
-                              onClick={() => handleEdit(row)}
-                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
-                              title="Edit"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(row.id)}
+                              onClick={() => setDeleteConfirm(row)}
                               className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
                               title="Delete"
                             >
