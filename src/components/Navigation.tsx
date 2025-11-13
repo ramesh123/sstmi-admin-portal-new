@@ -60,6 +60,12 @@ export default function Navigation() {
             className="text-blue-600 hover:underline"
           >Manage Faq's</button>
         </li>}
+        {(roleCond===1 || roleCond===2) && <li>
+          <button
+            onClick={() => navigateTo('/sendmail')}
+            className="text-blue-600 hover:underline"
+          >Send Mail</button>
+        </li>}
       </ul>
     </nav>
   );
