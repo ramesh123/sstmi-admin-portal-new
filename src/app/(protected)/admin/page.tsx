@@ -1,6 +1,6 @@
 ﻿'use client';
+import { useState, useEffect } from 'react';
 import { AppSidebar } from '@/components/ui/AppSidebar';
-import { useState } from 'react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import nextDynamic from 'next/dynamic';
@@ -50,6 +50,7 @@ function TabPanel(props: TabPanelProps) {
 
 function AdminPage() {
     const [activeSection, setActiveSection] = useState('home');
+  const [roleCond, setRoleCond] = useState(1);
     const [currentTab, setCurrentTab] = useState(0);
     const [selectedDevotee, setSelectedDevotee] = useState<{
         Name: string;
@@ -76,6 +77,14 @@ function AdminPage() {
     const handleNewDevotee = (name: string) => {
         console.log('New devotee name:', name);
     };
+
+    useEffect(() => {
+    const storedUser = sessionStorage.getItem('adminuser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setRoleCond(user.roleid);
+    }
+  }, []);
 
     // Render main content based on sidebar selection
     const renderMainContent = () => {
@@ -112,16 +121,16 @@ function AdminPage() {
                                     }
                                 }}
                             >
-                                <Tab label="Find Devotee" />
-                                <Tab label="Transactions" />
-                                <Tab label="Tax Letters" />
-                                <Tab label="Edit Transactions" />
-                                <Tab label="Backend Utilities" />
-                                <Tab label="Website Media Update" />
+                                {(roleCond===1 || roleCond===2) && <Tab label="Find Devotee" />}
+            {(roleCond===1 || roleCond===2) && <Tab label="Transactions" />}
+            {(roleCond===1) && <Tab label="Tax Letters" />}
+            {(roleCond===1) && <Tab label="Edit Transactions" />}
+            {(roleCond===1) && <Tab label="Backend Utilities" />}
+                                {(roleCond===1) && <Tab label="Website Media Update" />}
                             </Tabs>
                         </Box>
 
-                        <TabPanel value={currentTab} index={0}>
+                        {(roleCond===1 || roleCond===2) && <TabPanel value={currentTab} index={0}>
                             <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
                                 <Typography variant="h6" gutterBottom>
                                     Search Devotee
@@ -143,27 +152,27 @@ function AdminPage() {
                                     </Box>
                                 )}
                             </Box>
-                        </TabPanel>
+                        </TabPanel>}
 
-                        <TabPanel value={currentTab} index={1}>
+                        {(roleCond===1 || roleCond===2) && <TabPanel value={currentTab} index={1}>
                             <Transactions />
-                        </TabPanel>
+                        </TabPanel>}
 
-                        <TabPanel value={currentTab} index={2}>
+                        {(roleCond===1) && <TabPanel value={currentTab} index={2}>
                             <SingleTaxLetter />
-                        </TabPanel>
+                        </TabPanel>}
 
-                        <TabPanel value={currentTab} index={3}>
+                        {(roleCond===1) && <TabPanel value={currentTab} index={3}>
                             <EditTransactions />
-                        </TabPanel>
+                        </TabPanel>}
 
-                        <TabPanel value={currentTab} index={4}>
+                        {(roleCond===1) && <TabPanel value={currentTab} index={4}>
                             <BackendUtilities />
-                        </TabPanel>
+                        </TabPanel>}
 
-                        <TabPanel value={currentTab} index={5}>
+                        {(roleCond===1) && <TabPanel value={currentTab} index={5}>
                             <WebsiteMediaUpdate />
-                        </TabPanel>
+                        </TabPanel>}
                     </Box>
                 );
         }

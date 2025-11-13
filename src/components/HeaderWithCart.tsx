@@ -9,7 +9,10 @@ const signOutRedirect = () => {
   const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
   const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI; 
   const cognitoDomain = `https://${process.env.NEXT_PUBLIC_COGNITO_DOMAIN}`;
-  
+    sessionStorage.removeItem('adminuser');
+    sessionStorage.removeItem('token');
+    localStorage.clear();
+
   if (clientId && logoutUri && cognitoDomain) {
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   } else {

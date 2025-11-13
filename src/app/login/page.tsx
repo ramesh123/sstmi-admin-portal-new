@@ -165,7 +165,7 @@ export default function LoginPage() {
     router.push('/forgotpassword/');
   };
   const handleServices = () => {
-    router.push('/admin.html');
+    router.push('/admin');
   };
 
   useEffect(() => {
