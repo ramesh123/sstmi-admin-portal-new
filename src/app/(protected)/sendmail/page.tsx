@@ -1,20 +1,31 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
 
-interface User {
-  RoleId: number;
-  UserId: string;
-  IsActive: boolean;
-  CreatedAt: string;
-  Email: string;
-  Name: string;
+// Proper suppression of findDOMNode warning for React Quill
+const originalError = console.error;
+if (typeof window !== 'undefined') {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('findDOMNode')
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
 }
 
-interface SortConfig {
-  key: keyof User | null;
-  direction: 'asc' | 'desc';
-}
+const ReactQuill = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <div>Loading editor...</div>
+});
+
+// const ReactQuill = dynamic(() => import('react-quill'), { 
+//   ssr: false,
+//   loading: () => <div style={{ padding: '1rem', border: '1px solid #d1d5db', borderRadius: '8px', minHeight: '250px' }}>Loading editor...</div>
+// });
 
 interface EmailFormData {
   to: string;
@@ -81,15 +92,19 @@ const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 
 };
 
 const DataTable: React.FC = () => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const [emailFormData, setEmailFormData] = useState<EmailFormData>({
     to: '',
     from: '',
     subject: '',
     body: ''
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -99,9 +114,23 @@ const DataTable: React.FC = () => {
     }));
   };
 
+  const handleQuillChange = (content: string) => {
+    setEmailFormData(prev => ({
+      ...prev,
+      body: content
+    }));
+  };
+
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const stripHtmlTags = (html: string): string => {
+    if (typeof window === 'undefined') return '';
+    const tmp = document.createElement("DIV");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
   };
 
   const handleSendEmail = async () => {
@@ -130,7 +159,8 @@ const DataTable: React.FC = () => {
       return;
     }
 
-    if (!emailFormData.body.trim()) {
+    const plainTextBody = stripHtmlTags(emailFormData.body);
+    if (!plainTextBody.trim()) {
       setToast({
         message: 'Email body cannot be empty',
         type: 'error'
@@ -141,42 +171,30 @@ const DataTable: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Replace this with your actual API endpoint
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
+      const jsonObj = { recipient: emailFormData.to, subject: emailFormData.subject, body: stripHtmlTags(emailFormData.body) };
+      const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          to: emailFormData.to,
-          from: emailFormData.from,
-          subject: emailFormData.subject,
-          body: emailFormData.body,
-          timestamp: new Date().toISOString()
-        }),
+        body: JSON.stringify(jsonObj)
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to send email');
-      }
-
-      const result = await response.json();
-
-      setToast({
-        message: 'Email sent successfully!',
-        type: 'success'
-      });
-
-      // Reset form
-      setEmailFormData({
+      const data = await response.json();
+      console.log("data",data);
+      if (data?.statusCode === 200) {
+        setToast({ message: 'Email sent successfully!', type: 'success' });
+        setEmailFormData({
         to: '',
         from: '',
         subject: '',
         body: ''
       });
+      } else {
+        setToast({ message: 'Failed to send email. Please try again.', type: 'error' });
+      }       
 
     } catch (error) {
-      console.error('Error sending email:', error);
+     // console.error('Error sending email:', error);
       setToast({
         message: 'Failed to send email. Please try again.',
         type: 'error'
@@ -186,9 +204,30 @@ const DataTable: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    // Component initialization logic
-  }, []);
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'align': [] }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'color', 'background',
+    'align',
+    'link'
+  ];
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
@@ -218,9 +257,6 @@ const DataTable: React.FC = () => {
         </h1>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* From Field */}
-        
-
           {/* To Field */}
           <div>
             <label style={{ 
@@ -251,7 +287,9 @@ const DataTable: React.FC = () => {
               onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
             />
           </div>
-  <div>
+
+          {/* From Field */}
+          <div>
             <label style={{ 
               display: 'block', 
               fontSize: '0.875rem', 
@@ -280,6 +318,7 @@ const DataTable: React.FC = () => {
               onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
             />
           </div>
+
           {/* Subject Field */}
           <div>
             <label style={{ 
@@ -311,7 +350,7 @@ const DataTable: React.FC = () => {
             />
           </div>
 
-          {/* Message Textarea */}
+          {/* React Quill Editor */}
           <div>
             <label style={{ 
               display: 'block', 
@@ -322,33 +361,30 @@ const DataTable: React.FC = () => {
             }}>
               Message <span style={{ color: '#ef4444' }}>*</span>
             </label>
-            <textarea
-              name="body"
-              value={emailFormData.body}
-              onChange={handleEmailInputChange}
-              placeholder="Enter your message here..."
-              rows={12}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'all 0.2s',
-                fontFamily: 'inherit',
-                resize: 'vertical',
-                minHeight: '200px'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-            />
+            <div style={{
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}>
+              <ReactQuill
+                theme="snow"
+                value={emailFormData.body}
+                onChange={handleQuillChange}
+                modules={modules}
+                formats={formats}
+                placeholder="Enter your message here..."
+                style={{
+                  minHeight: '250px',
+                  backgroundColor: 'white'
+                }}
+              />
+            </div>
             <div style={{
               fontSize: '0.75rem',
               color: '#6b7280',
               marginTop: '0.5rem'
             }}>
-              {emailFormData.body.length} characters
+              {stripHtmlTags(emailFormData.body).length} characters
             </div>
           </div>
 
@@ -407,6 +443,21 @@ const DataTable: React.FC = () => {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+        
+        .ql-container {
+          font-family: inherit;
+          font-size: 1rem;
+          min-height: 200px;
+        }
+        
+        .ql-editor {
+          min-height: 200px;
+        }
+        
+        .ql-editor.ql-blank::before {
+          color: #9ca3af;
+          font-style: normal;
         }
       `}</style>
     </>

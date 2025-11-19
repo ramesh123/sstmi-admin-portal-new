@@ -79,7 +79,9 @@ const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 
 const RegisterForm: React.FC = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [strengthLabel, setStrengthLabel] = useState('');
-  const searchParams = useSearchParams();
+//  const searchParams = useSearchParams();
+  // const params = useSearchParams();
+  // const tokencode = params.get("token");
   const [tokencode, setTokencode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -139,9 +141,10 @@ const RegisterForm: React.FC = () => {
   }
 
 useEffect(() => {
-  const tokenParam = searchParams.get("token");
-  setTokencode(tokenParam);
-}, [searchParams]);
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    setTokencode(token);
+  }, []);
 
 // Calculate password strength in real-time
 useEffect(() => {
