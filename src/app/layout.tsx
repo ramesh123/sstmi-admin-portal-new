@@ -50,11 +50,11 @@ export default function RootLayout({
 
     return (
         <html lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} style={{backgroundColor:'#FFF8E1'}}>
                 <CartProvider>
                     <ErrorBoundary>
                         {showHeader && <HeaderWithCart />}
-                        <main className="container mx-auto px-4 py-8">{children}</main>
+                        <main className="container mx-auto px-4">{children}</main>
                     </ErrorBoundary>
                 </CartProvider>
             </body>

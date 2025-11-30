@@ -6,18 +6,18 @@ import Cart from "@/components/Cart";
 import { useCart } from "@/context/CartContext";
 
 const signOutRedirect = () => {
-  const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
-  const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI; 
-  const cognitoDomain = `https://${process.env.NEXT_PUBLIC_COGNITO_DOMAIN}`;
+    const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
+    const logoutUri = process.env.NEXT_PUBLIC_LOGOUT_URI;
+    const cognitoDomain = `https://${process.env.NEXT_PUBLIC_COGNITO_DOMAIN}`;
     sessionStorage.removeItem('adminuser');
     sessionStorage.removeItem('token');
     localStorage.clear();
 
-  if (clientId && logoutUri && cognitoDomain) {
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-  } else {
-    console.error('Missing environment variables for Cognito logout.');
-  }
+    if (clientId && logoutUri && cognitoDomain) {
+        window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    } else {
+        console.error('Missing environment variables for Cognito logout.');
+    }
 };
 
 export default function HeaderWithCart() {
@@ -26,7 +26,7 @@ export default function HeaderWithCart() {
 
     return (
         <>
-            <header className="bg-gray-800 text-white p-4 flex items-center justify-between">
+            <header className="text-white p-4 flex items-center justify-between" style={{ backgroundColor: '#1A3C34' }}>
                 {/* Left: Placeholder for alignment */}
                 <div className="w-1/3" />
 
