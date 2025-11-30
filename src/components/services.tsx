@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "@/hooks/use-toast";
-import ServiceCard from "./ServiceCard";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
 import AddServiceForm from "./AddServiceForm";
 import ServiceControls from "./SericeControls";
 interface Service {
@@ -110,13 +111,12 @@ const Services = () => {
         });
     };
 
-    const handleUpdateService = (serviceId: string, newPrice: number) => {
-        const updatedServices = services.map(service =>
-            service.id === serviceId
-                ? { ...service, price: newPrice }
-                : service
-        );
-        setServices(updatedServices);
+    const handleDeleteService = (serviceId: string) => {
+        setServices(services.filter(s => s.id !== serviceId));
+        toast({
+            title: "Service Deleted",
+            description: "The service has been removed.",
+        });
     };
 
     return (
@@ -137,15 +137,70 @@ const Services = () => {
                     />
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredServices.map((service) => (
-                        <ServiceCard
-                            key={service.id}
-                            service={service}
-                            onAddToCart={handleAddToCart}
-                            onUpdateService={handleUpdateService}
-                        />
-                    ))}
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Service Name
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Price
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Edit
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Delete
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredServices.map((service) => (
+                                <tr key={service.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <div className="text-sm font-medium text-gray-900">{service.name}</div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <div className="text-sm font-medium text-gray-900">{service.name}</div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">${service.price}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-blue-600 hover:text-blue-900"
+                                            onClick={() => {
+                                                // Placeholder for edit functionality
+                                                toast({ title: "Edit", description: `Editing ${service.name}` });
+                                            }}
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                        </Button>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-600 hover:text-red-900"
+                                            onClick={() => handleDeleteService(service.id)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
                 {filteredServices.length === 0 && (

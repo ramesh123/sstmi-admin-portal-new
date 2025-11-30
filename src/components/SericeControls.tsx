@@ -10,16 +10,7 @@ interface ServiceControlsProps {
 
 const ServiceControls = ({ searchTerm, onSearchChange, onAddServiceClick }: ServiceControlsProps) => {
     return (
-        <div className="flex justify-between items-center mb-8">
-            <Button
-                onClick={onAddServiceClick}
-                size="sm"
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
-            >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Service
-            </Button>
-
+        <div className="flex justify-end items-center mb-8 space-x-4">
             <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-600 w-4 h-4" />
                 <Input
@@ -30,6 +21,15 @@ const ServiceControls = ({ searchTerm, onSearchChange, onAddServiceClick }: Serv
                     className="pl-10 border-amber-300 focus:border-orange-500 focus:ring-orange-500"
                 />
             </div>
+
+            <Button
+                onClick={onAddServiceClick}
+                size="sm"
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+            >
+                <Plus className="w-3 h-3 mr-1" />
+                Add Service
+            </Button>
         </div>
     );
 };
