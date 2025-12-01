@@ -343,16 +343,22 @@ const ServicesManager = () => {
                 body: JSON.stringify(payload)
             });
 
+            // Log the full response to debug
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            const responseData = await response.text();
+            console.log('Response body:', responseData);
+
             if (!response.ok) {
-                throw new Error('Failed to save service');
+                throw new Error(`Failed to save service: ${response.status} - ${responseData}`);
             }
 
             await loadServices();
             setIsModalOpen(false);
             setToast({ message: `Service ${isEdit ? 'updated' : 'added'} successfully!`, type: 'success' });
         } catch (err) {
-            console.error(err);
-            setToast({ message: 'Failed to save service', type: 'error' });
+            setToast({ message: `Failed to save service`, type: 'error' });
         } finally {
             setIsLoading(false);
         }
