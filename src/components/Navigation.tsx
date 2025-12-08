@@ -33,14 +33,6 @@ export default function Navigation() {
         <h2 className="text-2xl font-bold text-gray-800">Admin Panel</h2>
       </div>
       <ul className="space-y-2">
-          <li>
-            <button
-              onClick={() => navigateTo('/change-password')}
-              className={getButtonClass('/change-password')}
-            >
-              Change Password
-            </button>
-          </li>
         {(roleCond === 1 || roleCond === 2) && (
           <li>
             <button
