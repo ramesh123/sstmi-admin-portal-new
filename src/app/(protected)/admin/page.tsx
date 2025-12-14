@@ -5,6 +5,7 @@ interface Service {
     name: string;
     price: number;
     group: string;
+    image: string;
 }
 
 interface SortConfig {
@@ -78,7 +79,8 @@ const ServiceModal = ({ service, onClose, onSave, isEdit }: {
     const [formData, setFormData] = useState({
         name: service?.name || '',
         price: service?.price || 0,
-        group: service?.group || ''
+        group: service?.group || '',
+        image: service?.image || '',
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -174,6 +176,22 @@ const ServiceModal = ({ service, onClose, onSave, isEdit }: {
                             />
                             {errors.group && <p className="text-red-500 text-xs mt-1">{errors.group}</p>}
                         </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Image
+                            </label>
+                             <input
+                                type="text"
+                                value={formData.image}
+                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${errors.group ? 'border-red-500' : 'border-gray-300'
+                                    }`}
+                                placeholder="Enter emoji (e.g., 🔔)"
+                            />
+                            {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
+                        </div>
+                        
                     </div>
 
                     <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
@@ -245,25 +263,32 @@ const ServicesManager = () => {
     }, []);
 
     const loadServices = async () => {
-        setServices([]);
-        fetch("https://sstmi-website.s3.us-east-1.amazonaws.com/assets/services.json")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
-                return response.json();
-            })
-            .then((data: Service[]) => {
-                setServices(data);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error loading Services data:", error);
-                setIsLoading(false);
-            });
-    };
-
-
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://esalzmioqk.execute-api.us-east-1.amazonaws.com/Prod/services', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          httpMethod: 'GET'
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch Services');
+      }
+      const result = await response.json();
+      const data = JSON.parse(result.body);
+      setServices(data);
+      setIsLoading(false);
+    } catch (err) {
+      //setToast({ message: 'Failed to load faqs data. Please refresh the page.', type: 'error' });
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
     const sortData = (data: Service[]): Service[] => {
         if (!sortConfig.key) return data;
 
@@ -331,7 +356,8 @@ const ServicesManager = () => {
                 data: {
                     name: service.name,
                     price: service.price,
-                    group: service.group
+                    group: service.group,
+                    image: service.image
                 }
             };
 

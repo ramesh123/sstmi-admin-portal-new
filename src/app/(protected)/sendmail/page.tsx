@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Proper suppression of findDOMNode warning for React Quill
 const originalError = console.error;
@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const ReactQuill = dynamic(() => import('react-quill'), { 
+const ReactQuill = dynamic(() => import('react-quill-new'), { 
   ssr: false,
   loading: () => <div>Loading editor...</div>
 });
@@ -171,7 +171,7 @@ const DataTable: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const jsonObj = { recipient: emailFormData.to, subject: emailFormData.subject, body: stripHtmlTags(emailFormData.body) };
+      const jsonObj = { recipient: emailFormData.to, subject: emailFormData.subject, body: emailFormData.body };
       const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
         method: "POST",
         headers: {
