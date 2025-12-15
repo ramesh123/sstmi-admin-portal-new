@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
+import zIndex from "@mui/material/styles/zIndex";
 
 // Proper suppression of findDOMNode warning for React Quill
 const originalError = console.error;
@@ -420,8 +421,7 @@ const DataTable: React.FC = () => {
             </label>
             <div style={{
               border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              overflow: 'hidden'
+              borderRadius: '8px'
             }}>
               <ReactQuill
                 ref={quillRef}
