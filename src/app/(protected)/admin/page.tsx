@@ -176,22 +176,28 @@ const ServiceModal = ({ service, onClose, onSave, isEdit }: {
                             />
                             {errors.group && <p className="text-red-500 text-xs mt-1">{errors.group}</p>}
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Image
                             </label>
-                             <input
-                                type="text"
-                                value={formData.image}
-                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${errors.group ? 'border-red-500' : 'border-gray-300'
-                                    }`}
-                                placeholder="Enter emoji (e.g., 🔔)"
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setFormData({
+                                            ...formData,
+                                            image: `./assets/${file.name}`,
+                                        });
+                                    }
+                                }}
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition border-gray-300"
                             />
                             {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
                         </div>
-                        
+
                     </div>
 
                     <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
@@ -263,33 +269,32 @@ const ServicesManager = () => {
     }, []);
 
     const loadServices = async () => {
-    setIsLoading(true);
-    let payload = {
-        action: "read"
-      };
-    try {
-      const response = await fetch('https://esalzmioqk.execute-api.us-east-1.amazonaws.com/Prod/services', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch Services');
-      }
-      const result = await response.json();
-     // const data = JSON.parse(result.items);
-      setServices(result?.items);
-      setIsLoading(false);
-    } catch (err) {
-      setToast({ message: 'Failed to fetch Services. Please refresh the page.', type: 'error' });
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+        setIsLoading(true);
+        let payload = {
+            action: "read"
+        };
+        try {
+            const response = await fetch('https://esalzmioqk.execute-api.us-east-1.amazonaws.com/Prod/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch Services');
+            }
+            const result = await response.json();
+            setServices(result?.items);
+            setIsLoading(false);
+        } catch (err) {
+            setToast({ message: 'Failed to fetch Services. Please refresh the page.', type: 'error' });
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const sortData = (data: Service[]): Service[] => {
         if (!sortConfig.key) return data;
 

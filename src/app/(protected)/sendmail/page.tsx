@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -20,7 +20,7 @@ if (typeof window !== 'undefined') {
 const ReactQuill = dynamic(() => import('react-quill-new'), { 
   ssr: false,
   loading: () => <div>Loading editor...</div>
-});
+}) as any;
 
 interface EmailFormData {
   to: string;
@@ -96,10 +96,52 @@ const DataTable: React.FC = () => {
     subject: '',
     body: ''
   });
+  const quillRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Image handler for Quill
+  const imageHandler = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (file) {
+        // Check file size (limit to 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setToast({
+            message: 'Image size should be less than 5MB',
+            type: 'error'
+          });
+          return;
+        }
+
+        // Convert image to base64
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          const quill = quillRef.current?.getEditor();
+          if (quill) {
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', base64);
+            quill.setSelection(range.index + 1);
+          }
+        };
+        reader.onerror = () => {
+          setToast({
+            message: 'Failed to read image file',
+            type: 'error'
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  };
 
   const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -166,7 +208,14 @@ const DataTable: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const jsonObj = { sender:"noreply@sstmi.org",recipient: emailFormData.to, subject: emailFormData.subject, body_text: stripHtmlTags(emailFormData.body), body_html: emailFormData.body };
+      const jsonObj = { 
+        sender: "noreply@sstmi.org",
+        recipient: emailFormData.to, 
+        subject: emailFormData.subject, 
+        body_text: stripHtmlTags(emailFormData.body), 
+        body_html: emailFormData.body 
+      };
+      
       const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
         method: "POST",
         headers: {
@@ -174,22 +223,23 @@ const DataTable: React.FC = () => {
         },
         body: JSON.stringify(jsonObj)
       });
+      
       const data = await response.json();
-      console.log("data",data);
+      console.log("data", data);
+      
       if (data?.statusCode === 200) {
         setToast({ message: 'Email sent successfully!', type: 'success' });
         setEmailFormData({
-        to: '',
-        from: '',
-        subject: '',
-        body: ''
-      });
+          to: '',
+          from: 'noreply@sstmi.org',
+          subject: '',
+          body: ''
+        });
       } else {
         setToast({ message: 'Failed to send email. Please try again.', type: 'error' });
       }       
 
     } catch (error) {
-     // console.error('Error sending email:', error);
       setToast({
         message: 'Failed to send email. Please try again.',
         type: 'error'
@@ -200,24 +250,34 @@ const DataTable: React.FC = () => {
   };
 
   const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'align': [] }],
-      ['link', 'image'],  // Added 'image' here
-      ['clean']
-    ],
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike", "blockquote"],
+        [
+          { list: "ordered" },
+          { list: "bullet" },
+          { indent: "-1" },
+          { indent: "+1" }
+        ],
+        ["link", "image", "code-block"],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        ["clean"]
+      ],
+      handlers: {
+        image: imageHandler
+      }
+    }
   };
 
   const formats = [
     'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'code-block',
     'color', 'background',
-    'align',
-    'link'
+    'align'
   ];
 
   if (!isMounted) {
@@ -306,7 +366,9 @@ const DataTable: React.FC = () => {
                 borderRadius: '8px',
                 fontSize: '1rem',
                 outline: 'none',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                backgroundColor: '#f9fafb',
+                color: '#6b7280'
               }}
               onFocus={(e) => e.target.style.borderColor = '#6366f1'}
               onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -362,6 +424,7 @@ const DataTable: React.FC = () => {
               overflow: 'hidden'
             }}>
               <ReactQuill
+                ref={quillRef}
                 theme="snow"
                 value={emailFormData.body}
                 onChange={handleQuillChange}
@@ -453,6 +516,11 @@ const DataTable: React.FC = () => {
         .ql-editor.ql-blank::before {
           color: #9ca3af;
           font-style: normal;
+        }
+
+        .ql-editor img {
+          max-width: 100%;
+          height: auto;
         }
       `}</style>
     </>
