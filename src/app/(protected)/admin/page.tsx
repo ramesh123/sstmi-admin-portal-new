@@ -264,25 +264,26 @@ const ServicesManager = () => {
 
     const loadServices = async () => {
     setIsLoading(true);
+    let payload = {
+        action: "read"
+      };
     try {
       const response = await fetch('https://esalzmioqk.execute-api.us-east-1.amazonaws.com/Prod/services', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          httpMethod: 'GET'
-        })
+        body: JSON.stringify(payload)
       });
       if (!response.ok) {
         throw new Error('Failed to fetch Services');
       }
       const result = await response.json();
-      const data = JSON.parse(result.body);
-      setServices(data);
+     // const data = JSON.parse(result.items);
+      setServices(result?.items);
       setIsLoading(false);
     } catch (err) {
-      //setToast({ message: 'Failed to load faqs data. Please refresh the page.', type: 'error' });
+      setToast({ message: 'Failed to fetch Services. Please refresh the page.', type: 'error' });
       console.error(err);
     } finally {
       setIsLoading(false);

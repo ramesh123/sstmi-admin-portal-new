@@ -22,11 +22,6 @@ const ReactQuill = dynamic(() => import('react-quill-new'), {
   loading: () => <div>Loading editor...</div>
 });
 
-// const ReactQuill = dynamic(() => import('react-quill'), { 
-//   ssr: false,
-//   loading: () => <div style={{ padding: '1rem', border: '1px solid #d1d5db', borderRadius: '8px', minHeight: '250px' }}>Loading editor...</div>
-// });
-
 interface EmailFormData {
   to: string;
   from: string;
@@ -97,7 +92,7 @@ const DataTable: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [emailFormData, setEmailFormData] = useState<EmailFormData>({
     to: '',
-    from: '',
+    from: 'noreply@sstmi.org',
     subject: '',
     body: ''
   });
@@ -171,7 +166,7 @@ const DataTable: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const jsonObj = { recipient: emailFormData.to, subject: emailFormData.subject, body: emailFormData.body };
+      const jsonObj = { sender:"noreply@sstmi.org",recipient: emailFormData.to, subject: emailFormData.subject, body_text: stripHtmlTags(emailFormData.body), body_html: emailFormData.body };
       const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
         method: "POST",
         headers: {
@@ -211,7 +206,7 @@ const DataTable: React.FC = () => {
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'align': [] }],
-      ['link'],
+      ['link', 'image'],  // Added 'image' here
       ['clean']
     ],
   };
@@ -304,7 +299,6 @@ const DataTable: React.FC = () => {
               name="from"
               value={emailFormData.from}
               onChange={handleEmailInputChange}
-              placeholder="sender@example.com"
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -316,6 +310,7 @@ const DataTable: React.FC = () => {
               }}
               onFocus={(e) => e.target.style.borderColor = '#6366f1'}
               onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              readOnly
             />
           </div>
 
