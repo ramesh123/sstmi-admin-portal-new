@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { AppSidebar } from '@/components/ui/AppSidebar';
 import { useState } from 'react';
 import { Box, Tabs, Tab, IconButton, Drawer } from '@mui/material';
@@ -14,10 +14,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 // Dynamically import components with SSR disabled
-const Transactions = nextDynamic(() => import('@/components/Transactions'), { ssr: false });
-const EditTransactions = nextDynamic(() => import('@/components/Edit-Transactions'), { ssr: false });
-const SingleTaxLetter = nextDynamic(() => import('@/components/SingleTaxLetter'), { ssr: false });
-const BackendUtilities = nextDynamic(() => import('@/components/BackendUtilities'), { ssr: false });
 const WebsiteMediaUpdate = nextDynamic(() => import('@/components/WebsiteMediaUpdate'), { ssr: false });
 
 export const dynamic = 'force-dynamic';
@@ -62,76 +58,20 @@ function AdminPage() {
     };
 
     const renderMainContent = () => {
-        switch (activeSection) {
-            case 'services':
-                return <Services />;
-            case 'Abhishekam':
-                return <Abishekam />;
-            case 'Pooja':
-                return <Pooja />;
-            case 'Donations':
-                return <Donations />;
-            case 'PriestServices':
-                return <PriestServices />;
-            case 'home':
-            default:
-                return (
+        return (
                     <Box sx={{ width: '100%' }}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', overflowX: 'auto' }}>
-                            <Tabs
-                                value={currentTab}
-                                onChange={handleTabChange}
-                                aria-label="admin tabs"
-                                variant="scrollable"
-                                scrollButtons="auto"
-                                allowScrollButtonsMobile
-                                sx={{
-                                    '& .MuiTab-root': {
-                                        minWidth: { xs: 70, sm: 100, md: 140 },
-                                        fontSize: { xs: '0.65rem', sm: '0.85rem', md: '0.95rem' },
-                                        padding: { xs: '4px 6px', sm: '8px 12px', md: '12px 16px' },
-                                        textTransform: 'none',
-                                        whiteSpace: 'nowrap'
-                                    }
-                                }}
-                            >
-                                <Tab label="Transactions" />
-                                <Tab label="Tax Letters" />
-                                <Tab label="Edit Trans" />
-                                <Tab label="Utilities" />
-                                <Tab label="Media" />
-                            </Tabs>
-                        </Box>
-
                         <TabPanel value={currentTab} index={0}>
-                            <Transactions />
-                        </TabPanel>
-
-                        <TabPanel value={currentTab} index={1}>
-                            <SingleTaxLetter />
-                        </TabPanel>
-
-                        <TabPanel value={currentTab} index={2}>
-                            <EditTransactions />
-                        </TabPanel>
-
-                        <TabPanel value={currentTab} index={3}>
-                            <BackendUtilities />
-                        </TabPanel>
-
-                        <TabPanel value={currentTab} index={4}>
                             <WebsiteMediaUpdate />
                         </TabPanel>
                     </Box>
                 );
-        }
     };
 
     return (
         <SidebarProvider>
             <Box sx={{ display: 'flex', width: '100%', minHeight: '100vh', gap: 0, flexDirection: { xs: 'column', md: 'row' } }}>
                 {/* Mobile Drawer Sidebar - Hidden, triggered from header */}
-                {/* <Drawer
+                <Drawer
                     anchor="left"
                     open={mobileDrawerOpen}
                     onClose={() => setMobileDrawerOpen(false)}
@@ -144,7 +84,7 @@ function AdminPage() {
                         </Box>
                         <AppSidebar onNavigate={handleSidebarNavigate} />
                     </Box>
-                </Drawer> */}
+                </Drawer>
 
                 {/* Desktop Sidebar - Only on desktop */}
                 {/* <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>

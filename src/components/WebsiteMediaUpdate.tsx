@@ -77,6 +77,7 @@ const WebsiteMediaUpdate: React.FC = () => {
   const [eventsImages, setEventsImages] = useState<S3Image[]>([]);
   const [carouselImages, setCarouselImages] = useState<S3Image[]>([]);
   const [galleryImages, setGalleryImages] = useState<S3Image[]>([]);
+  const [serviceImages, setServiceImages] = useState<S3Image[]>([]);
   
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -92,7 +93,8 @@ const WebsiteMediaUpdate: React.FC = () => {
   const folders = [
     { name: 'Events', path: 'assets/events/', state: eventsImages, setState: setEventsImages },
     { name: 'Carousel', path: 'assets/carousel/', state: carouselImages, setState: setCarouselImages },
-    { name: 'Gallery', path: 'assets/gallery/', state: galleryImages, setState: setGalleryImages }
+    { name: 'Gallery', path: 'assets/gallery/', state: galleryImages, setState: setGalleryImages },
+    { name: 'Services', path: 'assets/Services/', state: serviceImages, setState: setServiceImages }
   ];
 
   useEffect(() => {
@@ -461,6 +463,7 @@ const WebsiteMediaUpdate: React.FC = () => {
             <Tab label="Events" />
             <Tab label="Carousel" />
             <Tab label="Gallery" />
+            <Tab label="Services" />
           </Tabs>
         </Box>
 

@@ -39,10 +39,31 @@ export default function Navigation() {
               onClick={() => navigateTo('/admin')}
               className={getButtonClass('/admin')}
             >
+              Manage Admin
+            </button>
+          </li>
+        )}
+          {(roleCond === 1 || roleCond === 2) && (
+          <li>
+            <button
+              onClick={() => navigateTo('/services')}
+              className={getButtonClass('/services')}
+            >
               Manage Services
             </button>
           </li>
         )}
+        
+          {/* {(roleCond === 1 || roleCond === 2) && (
+          <li>
+            <button
+              onClick={() => navigateTo('/gallery')}
+              className={getButtonClass('/gallery')}
+            >
+              Manage Images
+            </button>
+          </li>
+        )} */}
         {(roleCond === 1 || roleCond === 2) && (
           <li>
             <button
