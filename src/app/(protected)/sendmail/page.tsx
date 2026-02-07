@@ -216,7 +216,7 @@ const DataTable: React.FC = () => {
         body_text: stripHtmlTags(emailFormData.body), 
         body_html: emailFormData.body 
       };
-      
+      console.log("jsonObj",jsonObj);
       const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
         method: "POST",
         headers: {
@@ -257,7 +257,6 @@ const DataTable: React.FC = () => {
         ["bold", "italic", "underline", "strike", "blockquote"],
         [
           { list: "ordered" },
-          { list: "bullet" },
           { indent: "-1" },
           { indent: "+1" }
         ],
@@ -275,7 +274,7 @@ const DataTable: React.FC = () => {
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
+    'list', 'indent',
     'link', 'image', 'code-block',
     'color', 'background',
     'align'

@@ -21,6 +21,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.0",
     "@mui/material": "^6.3.1",
+    "@mui/system": "^7.3.7",
     "@mui/x-data-grid": "^7.23.6",
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.14",

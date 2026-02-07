@@ -20,6 +20,7 @@ type SummaryData = {
   '2023': number;
   '2024': number;
   '2025'?: number;
+  '2026'?: number;
   Contributions: string;
   recent: string;
 };
@@ -243,6 +244,7 @@ const Transactions: React.FC<TransactionsProps> = ({ devoteeFilter }) => {
     { field: '2023', headerName: '2023', width: 100, type: 'number' },
     { field: '2024', headerName: '2024', width: 100, type: 'number' },
     { field: '2025', headerName: '2025', width: 100, type: 'number' },
+    { field: '2026', headerName: '2026', width: 100, type: 'number' },
     {
       field: 'Contributions',
       headerName: 'Contributions',
