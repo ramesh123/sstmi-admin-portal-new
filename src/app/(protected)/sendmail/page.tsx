@@ -144,11 +144,11 @@ const DataTable: React.FC = () => {
         }
       } else {
         // User pressed OK with empty input, show file picker
-        triggerFileUpload();
+        //triggerFileUpload();
       }
     } else {
       // User pressed Cancel, show file picker
-      triggerFileUpload();
+      //triggerFileUpload();
     }
   };
 
