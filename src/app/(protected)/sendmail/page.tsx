@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
-import zIndex from "@mui/material/styles/zIndex";
 
 // Proper suppression of findDOMNode warning for React Quill
 const originalError = console.error;
@@ -103,8 +102,57 @@ const DataTable: React.FC = () => {
     setIsMounted(true);
   }, []);
 
-  // Image handler for Quill
+  // Helper function to check if a URL is an image
+  const isImageUrl = (url: string): boolean => {
+    const imageExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico)(\?.*)?$/i;
+    return imageExtensions.test(url);
+  };
+
+  // Helper function to check if URL is valid
+  const isValidUrl = (string: string): boolean => {
+    try {
+      const url = new URL(string);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // Image handler for Quill (handles both file upload and URL paste)
   const imageHandler = () => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+
+    // Prompt user to choose between file upload or URL
+    const input = prompt('Enter image URL or press Cancel to upload a file:');
+    
+    if (input !== null) {
+      // User entered something (could be empty string or URL)
+      const trimmedInput = input.trim();
+      
+      if (trimmedInput) {
+        // User entered a URL
+        if (isValidUrl(trimmedInput)) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', trimmedInput);
+          quill.setSelection(range.index + 1);
+        } else {
+          setToast({
+            message: 'Please enter a valid URL (must start with http:// or https://)',
+            type: 'error'
+          });
+        }
+      } else {
+        // User pressed OK with empty input, show file picker
+        triggerFileUpload();
+      }
+    } else {
+      // User pressed Cancel, show file picker
+      triggerFileUpload();
+    }
+  };
+
+  const triggerFileUpload = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
@@ -159,6 +207,43 @@ const DataTable: React.FC = () => {
     }));
   };
 
+  // Handle paste event to detect image URLs - FIXED VERSION
+  useEffect(() => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill) return;
+
+    const handlePaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData('text/plain');
+      
+      if (text && isValidUrl(text) && isImageUrl(text)) {
+        // Prevent ALL default paste behavior to ensure it's not inserted as a link
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        
+        const range = quill.getSelection(true);
+        if (range) {
+          // Insert the image at cursor position using insertEmbed (not insertText or paste)
+          quill.insertEmbed(range.index, 'image', text);
+          quill.setSelection(range.index + 1);
+          
+          setToast({
+            message: 'Image URL inserted successfully',
+            type: 'success'
+          });
+        }
+      }
+    };
+
+    const editor = quill.root;
+    // Use capture phase (true) to intercept BEFORE Quill's default handlers
+    editor.addEventListener('paste', handlePaste, true);
+
+    return () => {
+      editor.removeEventListener('paste', handlePaste, true);
+    };
+  }, [isMounted]);
+
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -197,14 +282,14 @@ const DataTable: React.FC = () => {
       return;
     }
 
-    const plainTextBody = stripHtmlTags(emailFormData.body);
-    if (!plainTextBody.trim()) {
-      setToast({
-        message: 'Email body cannot be empty',
-        type: 'error'
-      });
-      return;
-    }
+    // const plainTextBody = stripHtmlTags(emailFormData.body);
+    // if (!plainTextBody.trim()) {
+    //   setToast({
+    //     message: 'Email body cannot be empty',
+    //     type: 'error'
+    //   });
+    //   return;
+    // }
 
     setIsLoading(true);
 
@@ -216,7 +301,8 @@ const DataTable: React.FC = () => {
         body_text: stripHtmlTags(emailFormData.body), 
         body_html: emailFormData.body 
       };
-      console.log("jsonObj",jsonObj);
+      console.log("jsonObj", jsonObj);
+      
       const response = await fetch("https://u2b0w593t4.execute-api.us-east-1.amazonaws.com/Prod/send-email", {
         method: "POST",
         headers: {
@@ -284,6 +370,12 @@ const DataTable: React.FC = () => {
     return null;
   }
 
+  const defaultValue = `
+  <h1>Welcome</h1>
+  <p>Thanks for signing up.</p>
+  <p>Please find the event details below.</p>
+`;
+
   return (
     <>
       {toast && (
@@ -310,6 +402,28 @@ const DataTable: React.FC = () => {
         }}>
           Send Email
         </h1>
+
+        {/* Instructions */}
+        <div style={{
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '8px',
+          padding: '1rem',
+          marginBottom: '1.5rem'
+        }}>
+          <p style={{ 
+            fontSize: '0.875rem', 
+            color: '#1e40af',
+            margin: 0,
+            lineHeight: '1.5'
+          }}>
+            <strong>💡 Tip:</strong> To insert images, you can:
+            <br />
+            • Click the image button in the toolbar and enter a URL or upload a file
+            <br />
+            • Paste an image URL directly (e.g., https://example.com/image.jpg) - it will be auto-detected and inserted as an image
+          </p>
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* To Field */}
@@ -424,12 +538,12 @@ const DataTable: React.FC = () => {
             }}>
               <ReactQuill
                 ref={quillRef}
-                theme="snow"
-                value={emailFormData.body}
+                theme="snow"                
+                value={emailFormData.body || defaultValue}
                 onChange={handleQuillChange}
                 modules={modules}
                 formats={formats}
-                placeholder="Enter your message here..."
+                placeholder="Compose your email message here..."
                 style={{
                   minHeight: '250px',
                   backgroundColor: 'white'
