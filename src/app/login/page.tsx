@@ -170,8 +170,8 @@ export default function LoginPage() {
 
   useEffect(() => {
       const user = sessionStorage.getItem('adminuser');
-      if (user) {
-        router.push('/admin');
+      if (!user) {
+        router.push('/login');
       }
     }, [router]);
 
