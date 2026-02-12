@@ -169,11 +169,14 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-      const user = sessionStorage.getItem('adminuser');
-      if (!user) {
-        router.push('/login');
+    const userStr = sessionStorage.getItem('adminuser');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user && user.email && user.email !== '') {
+        router.push('/admin');
       }
-    }, [router]);
+    }
+  }, [router]);
 
   return (
     <>

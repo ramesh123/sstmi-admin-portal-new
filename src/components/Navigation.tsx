@@ -19,13 +19,16 @@ export default function Navigation() {
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem('adminuser');
-    if (!storedUser && pathname !== '/login') {
-      router.push('/login');
-    } else if (storedUser) {
+    if (storedUser) {
       const user = JSON.parse(storedUser);
       setRoleCond(user.roleid);
+      // if (user && user.name != '') {
+
+      // } else {
+      //   router.push('/login');
+      // }
     }
-  }, [router, pathname]);
+  }, [router]);
 
   return (
     <nav className="w-64 bg-white shadow-lg min-h-screen p-6">
@@ -43,7 +46,7 @@ export default function Navigation() {
             </button>
           </li>
         )}
-          {(roleCond === 1 || roleCond === 2) && (
+        {(roleCond === 1 || roleCond === 2) && (
           <li>
             <button
               onClick={() => navigateTo('/services')}
@@ -53,8 +56,8 @@ export default function Navigation() {
             </button>
           </li>
         )}
-        
-          {/* {(roleCond === 1 || roleCond === 2) && (
+
+        {/* {(roleCond === 1 || roleCond === 2) && (
           <li>
             <button
               onClick={() => navigateTo('/gallery')}

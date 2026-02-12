@@ -67,8 +67,7 @@ export default function HeaderWithCart() {
                     <h1 className="text-2xl font-bold">SSTMI POS Portal</h1>
                 </div>
 
-                {/* Right: User Dropdown + Cart */}
-                <nav className="flex items-center space-x-6 w-1/3 justify-end">
+                {username && <nav className="flex items-center space-x-6 w-1/3 justify-end">
                     {/* User Dropdown */}
                     <div className="relative" ref={dropdownRef}>
                         <button
@@ -108,22 +107,7 @@ export default function HeaderWithCart() {
                             </div>
                         )}
                     </div>
-
-                    {/* Cart Button */}
-                    {/* <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsCartOpen(true)}
-                        className="relative border-amber-300 text-amber-700 hover:bg-amber-50"
-                    >
-                        <ShoppingCart className="w-4 h-4" />
-                        {getCartCount() > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center pointer-events-none select-none">
-                                {getCartCount()}
-                            </span>
-                        )}
-                    </Button> */}
-                </nav>
+                </nav>}
             </header>
 
             {/* <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} /> */}
