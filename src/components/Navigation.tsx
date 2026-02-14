@@ -16,57 +16,23 @@ export default function Navigation() {
       ? "w-full text-left px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg transition-colors"
       : "w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors";
   };
-
-  useEffect(() => {
-    const storedUser = sessionStorage.getItem('adminuser');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setRoleCond(user.roleid);
-      // if (user && user.name != '') {
-
-      // } else {
-      //   router.push('/login');
-      // }
-    }
-  }, [router]);
+  
+   useEffect(() => {
+        const loginName = sessionStorage.getItem('adminuser');
+        if (loginName) {
+            const loginData = JSON.parse(loginName);
+            setRoleCond(loginData.roleid);
+        } else {
+            router.push('/login');
+        }
+    }, [router]);
 
   return (
     <nav className="w-64 bg-white shadow-lg min-h-screen p-6">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800">Admin Panel</h2>
       </div>
-      <ul className="space-y-2">
-        {(roleCond === 1 || roleCond === 2) && (
-          <li>
-            <button
-              onClick={() => navigateTo('/admin')}
-              className={getButtonClass('/admin')}
-            >
-              Manage Admin
-            </button>
-          </li>
-        )}
-        {(roleCond === 1 || roleCond === 2) && (
-          <li>
-            <button
-              onClick={() => navigateTo('/services')}
-              className={getButtonClass('/services')}
-            >
-              Manage Services
-            </button>
-          </li>
-        )}
-
-        {/* {(roleCond === 1 || roleCond === 2) && (
-          <li>
-            <button
-              onClick={() => navigateTo('/gallery')}
-              className={getButtonClass('/gallery')}
-            >
-              Manage Images
-            </button>
-          </li>
-        )} */}
+      <ul className="space-y-2">        
         {(roleCond === 1 || roleCond === 2) && (
           <li>
             <button
@@ -94,6 +60,26 @@ export default function Navigation() {
               className={getButtonClass('/volunteer')}
             >
               Volunteer Dashboard
+            </button>
+          </li>
+        )}
+        {(roleCond === 1 || roleCond === 2) && (
+          <li>
+            <button
+              onClick={() => navigateTo('/admin')}
+              className={getButtonClass('/admin')}
+            >
+              Manage Admin
+            </button>
+          </li>
+        )}
+        {(roleCond === 1 || roleCond === 2) && (
+          <li>
+            <button
+              onClick={() => navigateTo('/services')}
+              className={getButtonClass('/services')}
+            >
+              Manage Services
             </button>
           </li>
         )}

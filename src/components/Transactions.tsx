@@ -45,8 +45,9 @@ const Transactions: React.FC<TransactionsProps> = ({ devoteeFilter }) => {
 
   const fetchWithRetry = useCallback(
     async (url: string, options: RequestInit, retries: number, delay: number): Promise<Response> => {
+      const fullUrl = 'https://admin.sstmi.org/transactions/transactions?uri=%2Ftransactions%2Ftransactions';
       try {
-        const response = await fetch(url, options);
+        const response = await fetch(fullUrl, options);
         if (!response.ok) {
           if (response.status === 401 && retries > 0) {
             await new Promise((resolve) => setTimeout(resolve, delay));

@@ -165,7 +165,7 @@ export default function LoginPage() {
     router.push('/forgotpassword/');
   };
   const handleServices = () => {
-    router.push('/admin');
+    router.push('/dashboard');
   };
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function LoginPage() {
     if (userStr) {
       const user = JSON.parse(userStr);
       if (user && user.email && user.email !== '') {
-        router.push('/admin');
+        router.push('/dashboard');
       }
     }
   }, [router]);

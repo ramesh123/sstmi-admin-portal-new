@@ -131,7 +131,7 @@ const RegisterForm: React.FC = () => {
         setToast({ message: msg?.message || 'Something went wrong', type: 'error' });
       }
       formik.resetForm();
-      router.push('/login/');
+      router.push('/');
     } catch (error) {
       setToast({ message: "An error occurred. Please try again later.", type: 'error' });
     } finally {

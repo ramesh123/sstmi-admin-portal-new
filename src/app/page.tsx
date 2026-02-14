@@ -7,9 +7,11 @@ import { useRouter } from 'next/navigation';
 export default function MainPage() {
     const router = useRouter();
 
-    useEffect(() => {
-        // Redirect to the login page by default
-        router.push('/login');
+     useEffect(() => {
+        const loginName = sessionStorage.getItem('adminuser');
+        if (!loginName) {
+            router.push('/login');
+        }
     }, [router]);
 
     return (

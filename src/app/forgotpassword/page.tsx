@@ -134,7 +134,7 @@ const ForgotPassword: React.FC = () => {
   };
 
 const handleLogin = () => {
-    router.push('/login/');
+    router.push('/');
   };
 
   return (
