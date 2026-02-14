@@ -20,6 +20,7 @@ type SummaryData = {
   '2023': number;
   '2024': number;
   '2025'?: number;
+  '2026'?: number;
   Contributions: string;
   recent: string;
 };
@@ -45,9 +46,8 @@ const Transactions: React.FC<TransactionsProps> = ({ devoteeFilter }) => {
 
   const fetchWithRetry = useCallback(
     async (url: string, options: RequestInit, retries: number, delay: number): Promise<Response> => {
-      const fullUrl = 'https://admin.sstmi.org/transactions/transactions?uri=%2Ftransactions%2Ftransactions';
       try {
-        const response = await fetch(fullUrl, options);
+        const response = await fetch(url, options);
         if (!response.ok) {
           if (response.status === 401 && retries > 0) {
             await new Promise((resolve) => setTimeout(resolve, delay));
@@ -244,6 +244,7 @@ const Transactions: React.FC<TransactionsProps> = ({ devoteeFilter }) => {
     { field: '2023', headerName: '2023', width: 100, type: 'number' },
     { field: '2024', headerName: '2024', width: 100, type: 'number' },
     { field: '2025', headerName: '2025', width: 100, type: 'number' },
+    { field: '2026', headerName: '2026', width: 100, type: 'number' },
     {
       field: 'Contributions',
       headerName: 'Contributions',
@@ -315,7 +316,7 @@ const Transactions: React.FC<TransactionsProps> = ({ devoteeFilter }) => {
           <DataGrid
             rows={summaryData}
             columns={summaryColumns.filter(col => 
-              ['2023', '2024', '2025'].includes(col.field)
+              ['2023', '2024', '2025', '2026'].includes(col.field)
             )}
             autoHeight
             hideFooter
